@@ -752,6 +752,7 @@ export class BaileysStartupService extends ChannelStartupService {
             instanceId: this.instanceId,
             remoteJid: chat.id,
             name: chat.name,
+            unreadMessages: typeof chat.unreadCount === 'number' ? chat.unreadCount : 0,
           },
           data: { remoteJid: chat.id },
         });
@@ -1366,6 +1367,8 @@ export class BaileysStartupService extends ChannelStartupService {
     },
 
     'messages.update': async (args: WAMessageUpdate[], settings: any) => {
+      const unreadChatToUpdate: Record<string, number> = {}; // {remoteJid: readedMessages}
+
       this.logger.log(`Update messages ${JSON.stringify(args, undefined, 2)}`);
 
       const readChatToUpdate: Record<string, true> = {}; // {remoteJid: true}
@@ -1413,6 +1416,8 @@ export class BaileysStartupService extends ChannelStartupService {
             continue;
           }
 
+          //if (status[update.status] === 'READ' && !key.fromMe) return;
+
           if (update.message === null && update.status === undefined) {
             this.sendDataWebhook(Events.MESSAGES_DELETE, key);
 
@@ -1439,18 +1444,15 @@ export class BaileysStartupService extends ChannelStartupService {
               );
             }
 
-            continue;
-          } else if (update.status !== undefined && status[update.status] !== findMessage.status) {
-            if (!key.fromMe && key.remoteJid) {
-              readChatToUpdate[key.remoteJid] = true;
-
-              if (status[update.status] === status[4]) {
-                this.logger.log(`Update as read ${key.remoteJid} - ${findMessage.messageTimestamp}`);
-                this.updateMessagesReadedByTimestamp(key.remoteJid, findMessage.messageTimestamp);
-              }
+            return;
+          } else if (update.message !== undefined && update.message !== findMessage.status) {
+            if (unreadChatToUpdate[key.remoteJid!] === undefined) {
+              unreadChatToUpdate[key.remoteJid!] = 0;
             }
 
-            await this.prismaRepository.message.update({
+            unreadChatToUpdate[key.remoteJid!]++;
+
+            this.prismaRepository.message.update({
               where: { id: findMessage.id },
               data: { status: status[update.status] },
             });

@@ -4057,7 +4057,7 @@ export class BaileysStartupService extends ChannelStartupService {
   }
 
   public async fetchAllGroups(getParticipants: GetParticipant) {
-    const fetch = Object.values(await this?.client?.groupFetchAllParticipating());
+    const fetch: any = Object.values(await this?.client?.groupFetchAllParticipating());
 
     let groups = [];
     for (const group of fetch) {

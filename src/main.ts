@@ -13,6 +13,7 @@ import compression from 'compression';
 import cors from 'cors';
 import express, { json, NextFunction, Request, Response, urlencoded } from 'express';
 import { join } from 'path';
+process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
 function initWA() {
   waMonitor.loadInstance();

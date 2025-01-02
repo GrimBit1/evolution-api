@@ -1142,7 +1142,7 @@ export class BaileysStartupService extends ChannelStartupService {
               remoteJid: received.key.remoteJid,
               instanceId: this.instanceId,
               name: received.pushName || '',
-              unreadMessages: 0,
+              unreadMessages: existingChat.unreadMessages ? existingChat.unreadMessages + 1 : 0,
             };
 
             this.sendDataWebhook(Events.CHATS_UPSERT, [chatToInsert]);
@@ -1478,7 +1478,7 @@ export class BaileysStartupService extends ChannelStartupService {
               remoteJid: message.remoteJid,
               instanceId: this.instanceId,
               name: message.pushName || '',
-              unreadMessages: 0,
+              unreadMessages: existingChat.unreadMessages ? existingChat.unreadMessages + 1 : 0,
             };
 
             this.sendDataWebhook(Events.CHATS_UPSERT, [chatToInsert]);
